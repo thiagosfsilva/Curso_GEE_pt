@@ -1,0 +1,987 @@
+---
+title: "Ecological Remote Sensing using Googl Earth Engine"
+subtitle: "CUNY Workshop"
+author: "Thiago Sanna Freire Silva"
+date: "`r Sys.Date()`"
+output:
+  xaringan::moon_reader:
+    css: ["default", "mytheme.css"]  
+    chakra: libs/remark-latest.min.js
+    lib_dir: libs
+#    self_contained: true
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+      ratio: '16:9'
+---
+class: inverse, center, middle
+
+# Introductions
+
+```{r setup,include=FALSE,cache=FALSE}
+library(knitr)
+opts_chunk$set(eval=F)
+```
+---
+class: inverse, center, middle
+background-image: url('https://s.w-x.co/1_caters_earth_as_art_02-1_0.jpg')
+background-size: cover
+# Remote sensing basics
+
+---
+# What is remote sensing?
+
+.large["The science of acquiring information about objects without coming into contact with them".]
+
+$~$ 
+
+.large["The retrieval of **quantitative information** about the
+biophysical nature of objects in the Earth’s surface, by
+measuring the **type** and **quantity** of electromagnetic radiation
+**reflected** or **emitted** by these objects"]
+
+---
+# Electromagnetic waves
+
+Defined by a wavelength ( $\lambda$ ) or frequency ( $\nu$ ).
+
+Shorter wavelenghts = more energy!
+
+```{r eval=T, echo=FALSE, out.width='30%',fig.align='center'}
+knitr::include_graphics('https://upload.wikimedia.org/wikipedia/commons/4/4c/Electromagneticwave3D.gif')
+```
+
+$~$
+
+.tiny[Source: https://upload.wikimedia.org/wikipedia/commons/4/4c/Electromagneticwave3D.gif]
+---
+## The electromagnetic spectrum
+
+We can rank electromagnetic waves by their wavelength, comprising the **Electromagnetic Spectrum**.
+
+```{r eval=T, echo=FALSE, out.width='70%',fig.align='center'}
+knitr::include_graphics('https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/EM_Spectrum_Properties_edit.svg/1024px-EM_Spectrum_Properties_edit.svg.png')
+```
+
+.tiny[Source:https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/EM_Spectrum_Properties_edit.svg/1024px-EM_Spectrum_Properties_edit.svg.png]
+---
+
+# Main remote sensing regions
+
+- **Optical spectrum:**
+    - *Visible (VIS):*    
+        - Blue: 400-500 nm
+        - Green: 500-600 nm
+        - Red: 600-700 nm
+        - Red Edge: 700-750 nm
+    - *Near Infrared (NIR):* 700-1000 nm
+    - *Shortwave Infrared (SWIR):* 1000 - 2500 nm
+    
+- **Thermal spectrum:** 8 - 15 $\mu$m
+
+- **Microwave spectrum:** 
+    - P-band: 0.23-1 GHz (130-30 cm)
+    - L-band  1-2 GHz (30-15 cm)
+    - S-band  2-4 GHz (15-7.5 cm)
+    - C-band  4-8 GHz (7.5-3.75 cm)
+    - X-band  8-12.5 GHz (3.75-2.40 cm)
+
+--- 
+---
+## Where does electromagnetic radiation come from?
+
+Everywhere!
+
+```{r eval=T, echo=FALSE, out.width='60%',fig.align='center'}
+knitr::include_graphics('http://hyperphysics.phy-astr.gsu.edu/hbase/imgmod/bbrc6b.gif')
+```
+
+.tiny[Source: http://hyperphysics.phy-astr.gsu.edu/hbase/imgmod/bbrc6b.gif]
+
+---
+## The electromagnetic gang
+
+```{r eval=T, echo=FALSE, out.width='100%',fig.align='center'}
+knitr::include_graphics('https://bsclarified.files.wordpress.com/2011/07/colorflowchart.jpg')
+```
+
+.tiny[Source:https://bsclarified.files.wordpress.com/2011/07/colorflowchart.jpg]
+---
+# Main types of interactions
+
+```{r eval=T, echo=FALSE, out.width='40%',fig.align='center'}
+knitr::include_graphics('reflec.png')
+```
+
+---
+## The real power of remote sensing: measurements!
+
+More than anything, a remote sensing dataset is a set of **measurements**.
+
+- *Irradiance (E):* density of radiation arriving at the surface, per unit area, per wavelength ( $\lambda$ ).
+
+- *Radiance (L)*: density of radiation reflected (or emitted) by a surface per unit area, per solid angle ( $\Omega$ ), per wavelength ( $\lambda$ ).
+
+```{r eval=T, echo=FALSE, out.width='40%',fig.align='center'}
+knitr::include_graphics('https://i.stack.imgur.com/hZCSp.png')
+```
+
+.tiny[Source: https://i.stack.imgur.com/hZCSp.png]
+    
+---
+## Why bother measuring radiation?
+
+**Optical**
+
+```{r eval=T, echo=FALSE, out.width='70%',fig.align='center'}
+knitr::include_graphics('http://www.seos-project.eu/modules/remotesensing/images/Reflexionskurven.jpg')
+```
+
+.tiny[Source: http://www.seos-project.eu/modules/remotesensing/images/Reflexionskurven.jpg]
+
+---
+## Why bother measuring radiation?
+
+**Thermal**
+
+$$~$$
+
+$$~$$
+
+$$\Huge M = \sigma \epsilon T^{4}$$
+
+$$~$$
+
+$$~$$
+
+$$\Huge T_{rad} = \epsilon^{1/4} T_{kin}$$
+
+---
+## Why bother measuring radiation?
+
+**Microwave**
+
+```{r eval=T, echo=FALSE, out.width='40%',fig.align='center'}
+knitr::include_graphics('scattering.png')
+```
+
+---
+## Reflectance: the holy grail of optical remote sensing.
+
+**Spectral Reflectance** ( $\rho_{\lambda}$ ) is the ability of an object to reflect incident radiation. It is a unitless ration measure.
+
+
+$$\Huge 1 = \rho + \alpha + \tau $$
+
+$~$
+
+
+
+$$\Huge \rho_{\lambda} = \frac{\pi \times L_{\lambda}}{E_{\lambda}}$$
+
+
+For thermal and radar remote sensing, the analogs are *emissivity* ( $\epsilon$) and  *backscattering* ( $\sigma$ ). 
+
+---
+## Problem: that pesky atmosphere
+
+```{r eval=T, echo=FALSE, out.width='100%',fig.align='center'}
+knitr::include_graphics('https://landsat.gsfc.nasa.gov/wp-content/uploads/2016/10/all_Landsat_bands.png')
+```
+
+.tiny[Source:https://landsat.gsfc.nasa.gov/wp-content/uploads/2016/10/all_Landsat_bands.png]
+
+---
+## Atmospheric correction
+
+```{r eval=T, echo=FALSE, out.height='80%',fig.align='center'}
+knitr::include_graphics('https://atmospheric-correction.weebly.com/uploads/4/7/5/8/47582325/4721939.jpg?406')
+```
+---
+## The traditional remote sensing workflow
+
+1) Image acquisition
+
+2) Image calibration
+
+3) Atmospheric correction
+
+4) Geometric correction
+
+5) Feature Extraction
+
+6) Classification / Modeling
+
+---
+# Remote sensing products
+
+- Most of the processing workflow done by providers, using optimized algorithms
+
+- Modern trend: **Analysis Ready Data (ARD)**
+    - Seamless data (calibrated, geocorrected, gridded, regular time series)
+
+- **Higher level products:** using complex algorithms to extract features or even model quantities
+
+---
+# Main freely available sensors
+
+- **Optical & Thermal**:
+    - Landsat series, Sentinel-2, MODIS, VIIRS, Sentinel-3, AVHRR, ASTER 
+    
+- **Microwave**:
+    - ALOS-1/PALSAR-1, Sentinel-1, TerraSAR-X*
+    
+---
+# Useful remote sensing products:
+
+- **Topography:** SRTM, ASTER GDEM, ALOS World 3D DEM (AW3D30)
+
+- **Precipitation:** CHIRPS
+
+- **MODIS Land Products:** LAI/fPAR, GPP and NPP, Land Cover, Surface Temperature, Vegetation Indices, Evapotranspiration, VCF (percent tree cover), Burn Scars, Active Fires, "Clouds"
+
+- **Deforestation**: Hansen's Global Forest Watch, ALOS Forest/Non-Forest
+
+- **Vegetation height**: Simard el at. 2011
+
+- **Biomass**: WHRC Pantropical map
+
+- **Vegetation structure**: ALOS Annual Mosaics*
+---
+class: inverse, center, middle
+background-image: url("https://i.imgflip.com/17j2vf.jpg")
+
+# Google Earth Engine: unlimited power!
+
+---
+# Google Earth Engine
+
+ Online remote sensing platform hosted by Google
+ 
+ Hundreds of global datasets, including major historical remote sensing archives such as Landsat, MODIS, Sentinel, etc.
+ 
+ Other geospatial data such as SRTM, WorldCLim/Bioclim, and several other datasets
+
+--
+
+$~$
+
+Also, **huge** cloud processing power - continent-wide analyses take minutes!
+
+All for free! (yeah, right.)
+
+--
+
+$~$
+
+Has Python and JavaScript APIs, but **if you want to work interactively, you need to use the online JavaScript [Code Editor](https://code.earthengine.google.com/)**
+---
+# GEE Datasets and the Code Editor
+
+To find out wich datasets are available on GEE, use the dedicated Data Explorer on https://explorer.earthengine.google.com/#index.
+
+You can switch between `Catalog` and `Workspace` on the top right.
+
+Or, use the search bar on the [Code Editor](https://code.earthengine.google.com/).
+
+Although very limited, the [Code Editor](https://code.earthengine.google.com/ offers some useful tools:
+
+- Code repository with several examples
+- Function documentation
+- Dataset search
+- Manual digitizing
+- Map inspector
+
+
+---
+# GEE main data constructors
+
+**`ee.Image`**: a single image element. 
+
+**`ee.ImageCollection`**: A dataset comprised of several images. 
+
+**`ee.Feature`**: Single item vector data
+
+**`ee.Feature.Collection`**: Multi-item vector data
+
+**Other**: `ee.List`, `ee.Number`, `ee.String`, `ee.Array`, etc.
+
+---
+## Working with images
+
+**ee.Image**: a single image element. Type the code below and hit `Run` on the UI to run the code:
+
+```{js}
+// Load a single image from the new JAXA AW3D30
+//  digital elevation model
+
+var aw3d30 = ee.Image('JAXA/ALOS/AW3D30_V1_1')
+
+Map.addLayer(aw3d30)
+```
+**Don't forget to save your code often - there is no autosave!**
+
+--
+
+On GEE, we bring in data by passing a dataset ID to a constructor. In this case, we used an `image` constructor.
+
+---
+## Changing visualization parameters
+
+Doesn't look very great - GEE defaults to the maximum range of the data type. But `addLayer` takes a `visParams` parameter where we can manipulate things. It also takes a `name` parameter to help identify the layer on the map.
+
+`visParams` takes an object (`{}`) with named elements:
+
+```{js}
+Map.addLayer(aw3d30,{min: 0, max: 2000},'ALOS DEM')
+```
+
+--
+
+By the way, did you notice we just loaded a 30m spatial resolution DEM for the entire globe in a few seconds? 
+
+
+```{r eval=T, echo=FALSE, out.width='30%',fig.align='center'}
+knitr::include_graphics('https://media.giphy.com/media/xT0xeJpnrWC4XWblEk/giphy.gif')
+```
+---
+## What's in an image?
+
+We can use `print` on GEE to inspect an object:
+
+```{js}
+print('How the sausage is made:', aw3d30)
+```
+
+Image bands are named, and there is plenty of metadata acessible too.
+
+--
+
+$~$
+
+$~$
+
+We can use band names as inputs to a select method:
+
+```{js}
+Map.addLayer(aw3d30.select('AVE'), {min: 0, max: 2000}, 'AVE')
+
+Map.addLayer(aw3d30.select('MED'), {min: 0, max: 2000}, 'MED')
+```
+---
+## Working with Image Collections
+
+*Image Collection*: A dataset comprised of several images. Let's use the Landsat 5 historical record, for example:
+
+```{js}
+var L5 = ee.ImageCollection('LANDSAT/LT05/C01/T1_SR')
+
+print(L5)
+```
+What happened?
+
+--
+
+```{js}
+var count = L5.size()
+print('Count: ', count)
+```
+
+---
+
+### Can you understand all that's going on here?
+
+```{js}
+var L5 = ee.ImageCollection('LANDSAT/LT05/C01/T1_SR')
+
+//print(L5)
+
+var image = ee.Image(L5.first())
+
+print('What art thou?', image)
+
+var vizParams = {
+  bands: ['B5', 'B4', 'B3'],
+  min: 0,
+  max: 10000,
+}
+
+Map.addLayer(image, vizParams, 'First!')
+
+Map.centerObject(image, 6)
+
+```
+---
+## Metadata
+
+There are several functions to access image metadata:
+
+```{js}
+// Get information about the bands as a list.
+var bandNames = image.bandNames()
+print('Band names: ', bandNames) // ee.List of band names
+
+// Get projection information from band 1.
+var b1proj = image.select('B1').projection()
+print('Band 1 projection: ', b1proj) // ee.Projection object
+
+// Get scale (resolution, in meters) information from band 1.
+var b1scale = image.select('B1').projection().nominalScale()
+print('Band 1 resolution: ', b1scale) // ee.Number
+
+// Get a list of all metadata properties.
+var properties = image.propertyNames()
+print('Metadata properties: ', properties) 
+
+// Get a specific metadata property.
+var cloudiness = image.get('CLOUD_COVER')
+print('CLOUD_COVER: ', cloudiness) 
+```
+
+---
+## Working with collections 
+
+The first thing you'll want do with a `Collection` is filtering. There are many filter functions in GEE:
+
+```{js}
+var L5 = ee.ImageCollection('LANDSAT/LT05/C01/T1_SR')
+    .filterBounds(ROI) #<<
+
+var count = L5.size()
+print('Count: ', count)
+```
+---
+## Working with collections 
+
+The first thing you'll want do with a `Collection` is filtering. There are dozens of filter functions in GEE:
+
+```{js}
+var L5 = ee.ImageCollection('LANDSAT/LT05/C01/T1_SR')
+    .filterBounds(ROI) 
+    .filterDate('2010-01-01','2010-12-31') #<<
+
+var count = L5.size()
+print('Count: ', count)
+```
+---
+## Working with collections 
+
+The first thing you'll want do with a `Collection` is filtering. There are dozens of filter functions in GEE:
+
+```{js}
+var L5 = ee.ImageCollection('LANDSAT/LT05/C01/T1_SR')
+    .filterBounds(ROI) 
+    .filterDate('2010-01-01','2010-12-31')
+    .filterMetadata('CLOUD_COVER_LAND','less_than',10) #<<
+
+var count = L5.size()
+print('Count: ', count)
+
+```
+---
+## Working with collections 
+
+The first thing you'll want do with a `Collection` is filtering. There are dozens of filter functions in GEE:
+
+```{js}
+var L5 = ee.ImageCollection('LANDSAT/LT05/C01/T1_SR')
+    .filterBounds(ROI) 
+    .filterDate('2010-01-01','2010-12-31')
+    .filterMetadata('CLOUD_COVER_LAND','less_than',10)
+    .filter(ee.Filter.calendarRange(135,196,'day_of_year')) #<<
+
+var count = L5.size()
+print('Count: ', count)
+
+var image = ee.Image(L5.first())
+
+print('Image metadata', image)
+
+```
+---
+## What can we do with an image?
+
+**Mathematical operations**: by default they are applied on a per pixel basis.
+
+```{js}
+var landsat1999 = ee.Image('LANDSAT/LE7_TOA_5YEAR/1999_2003')
+var landsat2008 = ee.Image('LANDSAT/LE7_TOA_5YEAR/2008_2012')
+
+var ndvi1999 = landsat1999.select('B4')
+    .subtract(landsat1999.select('B3'))
+    .divide(landsat1999.select('B4')
+        .add(landsat1999.select('B3')))
+               
+Map.addLayer(ndvi1999,{min=0.3, max = 1},'NDVI 1999')
+
+var ndvi2008 = landsat2008.normalizedDifference(['B4', 'B3'])
+
+Map.addLayer(ndvi2008,{min=0.3, max = 1},'NDVI 2008')
+    
+var delta_ndvi = ndvi2008.subtract(ndvi1999)
+
+Map.addLayer(delta_ndvi, {min:0, max:0.5}, 'NDVI difference')
+
+```
+
+---
+## What can we do with an image?
+
+**Boolean operations**: for thresholding and masking.
+
+```{js}
+
+var bare = ndvi2008.lt(0.2)
+
+var changed = delta_ndvi.gt(0.1)
+
+Map.addLayer(bare,{},"Bare Areas")
+
+Map.addLayer(changed,{},"dNDVI > 0.1")
+
+Map.addLayer(ndvi2008.updateMask(bare), {}, 'Masked NDVI')
+```
+
+---
+## What can we do with an image?
+
+**Texture calculations**: An inportant proxy for habitat structure and complexity.
+
+```{js}
+
+// Define a neighborhood with a kernel.
+var square = ee.Kernel.square({radius: 5})
+
+var entropy = landsat2008.select('B4').entropy(square)
+
+Map.addLayer(entropy,{min: 1, max: 5},'entropy')
+
+```
+
+---
+## What can we do with an image?
+
+**Spectral transformations**: pan-sharpening and unmixing.
+
+```{js}
+var image = ee.Image('LANDSAT/LC08/C01/T1_TOA/LC08_044034_20140318')
+
+Map.addLayer(image, {
+    bands: ['B4', 'B3', 'B2'],
+    min: 0, max: 0.25
+    },'rgb')
+Map.centerObject(image)
+
+// Convert the RGB bands to the HSV color space.
+var hsv = image.select(['B4', 'B3', 'B2']).rgbToHsv()
+
+// Swap in the panchromatic band and convert back to RGB.
+var sharpened = ee.Image.cat([
+  hsv.select('hue'),
+  hsv.select('saturation'),
+  image.select('B8')
+]).hsvToRgb()
+
+Map.addLayer(sharpened, {min: 0, max: 0.25}, 'pan-sharpened')
+```
+---
+## What can we do with an image?
+
+**Spectral transformations**: pan-sharpening and unmixing.
+
+```{js}
+var image = ee.Image('LANDSAT/LT05/C01/T1/LT05_044034_20080214').select('B[1-7]')
+
+Map.addLayer(image, {
+    bands: ['B4', 'B3', 'B2'],
+    min: 0, max: 128
+    }, 'image')
+Map.centerObject(image)
+
+// Define spectral endmembers.
+var urban = [88, 42, 48, 38, 86, 115, 59]
+var veg = [50, 21, 20, 35, 50, 110, 23]
+var water = [51, 20, 14, 9, 7, 116, 4]
+
+// Unmix the image.
+var fractions = image.unmix([urban, veg, water])
+Map.addLayer(fractions, {}, 'unmixed')
+```
+
+
+---
+## What can we do with an image?
+
+**Specific algorithms**: there are some specific algorithms and helpin functions, but not much. Currently one of thr largest limitations for starting up with GEE.
+
+- `.normalizedDifference([bandnames])`
+- `.Terrain()`
+- `.rgb2hsv()`
+- `.unmix()`
+
+---
+## What can we do with collections?
+
+*Map*: apply a function to every image in a collection. The equivalent of a `for` loop (or an `lapply` in `R`).
+
+```{js}
+var L5 = ee.ImageCollection('LANDSAT/LT05/C01/T1_SR')
+    .filterBounds(ROI) 
+    .filterDate('2010-01-01','2010-12-31')
+    .filterMetadata('CLOUD_COVER_LAND','less_than',10)
+    .filter(ee.Filter.calendarRange(135,196,'day_of_year'))
+
+var calcNDVI = function(image) {
+  return image.normalizedDifference(['B4', 'B3'])
+} 
+
+var ndvi = L5.map(calcNDVI) #<<
+
+print(ndvi, "NDVI Collection")
+
+Map.addLayer(ee.Image(ndvi.first()))
+Map.centerObject(ndvi)
+```
+---
+## What can we do with collections?
+
+Mapping is also useful to apply masks. 
+
+```{js}
+// Function to extract and  apply cloud masks
+// from the Fmask band of Landsat SR data.
+
+var mask_clouds = function(image) {
+  // Bits 3 and 5 are cloud shadow and cloud, respectively.
+  var cloudShadowBitMask = ee.Number(2).pow(3).int();
+  var cloudsBitMask = ee.Number(2).pow(5).int();
+
+  // Get the pixel QA band.
+  var qa = image.select('pixel_qa');
+
+  // Both flags should be set to zero, indicating clear conditions.
+  var mask = qa.bitwiseAnd(cloudShadowBitMask).eq(0)
+      .and(qa.bitwiseAnd(cloudsBitMask).eq(0));
+
+  // Return the masked image
+  return image.updateMask(mask)
+}
+
+```
+---
+
+## What can we do with collections?
+
+Mapping is also useful to apply masks. 
+
+```{js}
+var cmasked = L5.map(mask_clouds)
+var masked = ee.Image(cmasked.first())
+
+var vizParams = {
+  bands: ['B5', 'B4', 'B3'],
+  min: 0,
+  max: 10000,
+}
+
+Map.addLayer(ee.Image(L5.first()), vizParams, 'Unmasked')
+
+Map.addLayer(masked, vizParams, 'Masked')
+
+```
+---
+## What can we do with collections?
+
+*Reduce*: combining images. This is one of my main uses of GEE: creating image composites!
+
+```{js}
+var reduced = cmasked.reduce(ee.Reducer.median())
+
+Map.addLayer(reduced,{
+  bands: ['B5_median', 'B4_median', 'B3_median'],
+  min: [200, 200, 200],
+  max: [3200, 3500, 2500]}
+, 'Masked')
+
+Map.centerObject(ROI, 15)
+```
+---
+## Reusing functions: modules
+
+You can export functions from other files in your repository (or shared repositories) to reuse common custom functions. Let's take the `mask_cloud` function and save it on a separate file called `LScloudmask`. The only difference is that we substitute `var` by `exports.`:
+
+```{js}
+// Function to cloud mask from the Fmask band of Landsat 8 SR data.
+
+exports.mask_clouds = function(image) {
+  // Bits 3 and 5 are cloud shadow and cloud, respectively.
+  var cloudShadowBitMask = ee.Number(2).pow(3).int();
+  var cloudsBitMask = ee.Number(2).pow(5).int();
+
+  // Get the pixel QA band.
+  var qa = image.select('pixel_qa');
+
+  // Both flags should be set to zero, indicating clear conditions.
+  var mask = qa.bitwiseAnd(cloudShadowBitMask).eq(0)
+      .and(qa.bitwiseAnd(cloudsBitMask).eq(0));
+
+  // Return the masked image, scaled to [0, 1].
+  return image.updateMask(mask)
+}
+```
+
+---
+
+## Reusing functions: modules
+
+Now, we can import these functions whenever we want to mask clouds in Landsat Surface Reflectance products:
+
+```{js}
+var mod = require('users/thiagosfsilva/modules:LScloudmask')
+
+var L8 = ee.ImageCollection('LANDSAT/LC08/C01/T1_SR')
+    .filterBounds(ROI) 
+    .filterDate('2014-01-01','2017-12-31')
+
+var L8_masked = L8.map(mod.mask_clouds)
+
+var L8_comp = L8.median()
+
+Map.addLayer(L8_comp,{
+  bands: ['B6', 'B5', 'B4'],
+  min: [200, 200, 200],
+  max: [3200, 3500, 2500]}
+, 'Masked')
+
+
+```
+
+---
+
+## Exercise: putting it all together
+
+0 - Start a new script! No cheating :-D!
+
+1 - Digitize a region of interest
+
+2 - Load the Landsat 5 collection 
+
+3 - Filter it by ROI, time period and seasonal period
+
+4 - Show the first image on the Map, with a R5G4B3 color composition
+
+5 - Apply the cloud mask to the collection (import the module)
+
+6 - Display the first masked image
+
+7 - Make a Landsat composite using a median reducer
+
+8 - Display the composite image
+
+9 - Calculate NDVI from the composite image
+
+---
+
+# Exporting data from GEE
+
+Generating different composites for wet and dry seasons
+
+```{js}
+var ROI = ee.Geometry.Rectangle([-47.98,-22.28, -47.80, -22.19]);
+// order is xMin, yMin, xMax, yMax
+
+var L8 = ee.ImageCollection('LANDSAT/LC08/C01/T1_SR')
+    .filterBounds(ROI) 
+    .filterDate('2014-01-01','2017-12-31')
+    
+var L8_wet = L8.filter(ee.Filter.calendarRange(1,90,'day_of_year'))
+var L8_dry = L8.filter(ee.Filter.calendarRange(152,243,'day_of_year'))
+
+var L8_wet_comp = L8_wet.map(mask_clouds).median().clip(ROI)
+var L8_dry_comp = L8_dry.map(mask_clouds).median().clip(ROI)
+
+var vizParam = {bands: ['B6', 'B5', 'B4'],
+                min: [200, 200, 200], max: [3200, 3500, 2500]}
+
+Map.addLayer(L8_wet_comp, vizParam, 'L5 Wet Season Composite')
+Map.addLayer(L8_dry_comp, vizParam, 'L5 Dry Season Composite')
+```
+---
+# Exporting data from GEE
+
+By default, GEE exports results to the user's Google Drive account:
+
+```{js}
+Export.image.toDrive({
+  image: L8_wet_comp,
+  description: 'L8_wet_season_20145-2017',
+  scale: 30
+})
+
+Export.image.toDrive({
+  image: L8_dry_comp,
+  description: 'L8_dry_season_2014-2017',
+  scale: 30
+})
+```
+
+---
+## Working with vector data
+
+**`Feature` and `FeatureCollection`***: the equivalent of `Image` and `ImageCollection`, for vector data.
+
+**Or, according to the GEE documentation:**
+
+"A Feature in Earth Engine is defined as a GeoJSON Feature. Specifically, a Feature is an object with a `geometry` property storing a Geometry object (or null) and a `properties` property storing a dictionary of other properties."
+---
+### Importing features
+
+Recently, GEE aded the ability to import shapefiles direclty from the Code Editor, making it simple to bring external features.
+
+On the top left portion of the Code Editor, do:
+
+- Click on the `Assets` tab;
+
+- Clik on `New` and select `Table Upload`
+
+- Select the shapefile of interest and all accessory files (`.dbf`,`.prj`,`.shx`)
+
+- Check the task progress on the `Tasks` tab
+
+- Once it is done, click om `Import into script`
+
+- Rename the variable to `iButton`
+
+- Suggestion: replace the `Import` by an actual line of code
+---
+## Combining images and features
+
+Me and the "Carnavalers" have been working on a project to relate field measurements of temperature with remote sensing metrics. 
+
+We already imported the ibutton locations:
+
+```{js}
+var ibutton = ee.FeatureCollection("users/thiagosfsilva/ibutton_locations")
+
+var ibuttonbbox = ibutton.geometry().bounds().buffer(1000)
+
+Map.addLayer(ibutton,{}, 'IButton locations')
+Map.addLayer(ibuttonbbox,{}, "Ibutton BBox")
+Map.centerObject(ibuttonbbox, 10)
+
+```
+---
+## Combining images and features
+
+Now lets generate some brightness temperature composites from Landsat
+
+
+```{js}
+var  mod = require('users/thiagosfsilva/modules:LScloudmask')
+
+var L5 = ee.ImageCollection('LANDSAT/LT05/C01/T1_SR')
+    .filterBounds(ibuttonbbox) 
+    .filterDate('2005-01-01','2010-12-31')
+
+var L5_masked = L5.map(mask_clouds)
+
+var vizParams = {
+  min: 2730, //(0 C = 273K /0.1 = 2730)
+  max: 3230,  //(50 C = 323K / 0.1 = 3230)
+  palette: ['yellow','orange','red']
+}
+
+Map.addLayer(ee.Image(L5_masked.first()).select('B6'), vizParams, 'Masked first image')
+
+var max_temp = L5_masked.max().select('B6').clip(ibuttonbbox)
+var min_temp = L5_masked.min().select('B6').clip(ibuttonbbox)
+
+Map.addLayer(max_temp,vizParams,"Maximum Temperature 2009-2010")
+Map.addLayer(min_temp, vizParams, "Minimum Temperature 2009-2010")
+```
+---
+## Combining images and features
+
+Then we can compute some vegetation descriptors
+
+```{js}
+var getNDVI = function(image){
+  var ndvi = image.normalizedDifference(['B4','B3'])
+  return(ndvi)
+}
+
+var L5_NDVI = L5_masked.map(getNDVI)
+
+var max_ndvi = L5_NDVI.max().clip(ibuttonbbox)
+var min_ndvi = L5_NDVI.min().clip(ibuttonbbox)
+
+var ndvi_range = max_ndvi.subtract(min_ndvi)
+
+Map.addLayer(max_ndvi,{min: -0.3, max: 1, palette: ['red','green']},"Max NDVI")
+Map.addLayer(ndvi_range,{min: 0, max: 2, palette: ['red','green']}, "NDVI_range")
+
+```
+---
+## Combining images and features
+
+And why not some topographical predictors?
+
+```{js}
+var alosdem = ee.Image('JAXA/ALOS/AW3D30_V1_1').select('MED').clip(ibuttonbbox)
+
+var slope = ee.Terrain.slope(alosdem)
+
+var aspect = ee.Terrain.aspect(alosdem)
+
+Map.addLayer(slope,{min: 0, max: 5},"Slope")
+
+Map.addLayer(aspect,{min: 0, max: 360},"Aspect")
+```
+---
+## Combining images and features
+
+Now we can assemble all bands into a single image:
+
+```{js}
+var pred_set = ee.Image.cat(max_temp, min_temp,
+  max_ndvi, ndvi_range, alosdem, slope, aspect)
+  .rename(['max_temp', 'min_temp',
+  'max_ndvi', 'ndvi_range', 'alosdem', 'slope', 'aspect'])
+
+print(pred_set)
+```
+
+---
+## Combining images and features
+
+And extract all predictor values:
+
+```{js}
+
+var pred_extract = pred_set.reduceRegions({
+  collection: ibutton,
+  reducer: ee.Reducer.first(),
+  scale: 30,
+})
+
+print(pred_extract)
+
+Export.table.toDrive({
+  collection: pred_extract,
+  description:'ibutton_extraction',
+  fileFormat: 'SHP',
+  folder: 'GEE'
+})
+
+```
+---
+class: inverse, center, middle
+
+# Image Classification
+---
+class: center, middle
+
+# Thank you!
+
+### thiago.sf.silva@unesp.br
