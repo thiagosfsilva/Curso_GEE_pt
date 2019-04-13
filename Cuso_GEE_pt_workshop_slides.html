@@ -1,40 +1,27 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+  <head>
+    <title>Processamento de imagens em larga escala utilizando a plataforma Google Earth Engine</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Thiago Sanna F. Silva e Annia Susin Streher" />
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Processamento de imagens em larga escala utilizando a plataforma Google Earth Engine
+## Mini Curso 07: SBSR 2019
+### Thiago Sanna F. Silva e Annia Susin Streher
+### 2019/04/13 (updated: 2019-04-13)
+
 ---
-title: "Processamento de imagens em larga escala utilizando a plataforma Google Earth Engine"
-subtitle: "Mini Curso 07: SBSR 2019"
-author: "Thiago Sanna F. Silva e Annia Susin Streher"
-date: "2019/04/13 (updated: `r Sys.Date()`)"
-output:
-  xaringan::moon_reader:
-    #css: ["default", "mytheme.css"] 
-    css: xaringan-themer.css 
-    lib_dir: libs
-    nature:
-      highlightStyle: github
-      highlightLines: true
-      countIncrementalSlides: false
-      ratio: '16:9'
- 
----
+
 class: inverse, center, middle
 background-image: url('https://s.w-x.co/1_caters_earth_as_art_02-1_0.jpg')
 background-size: cover
 
-```{r xaringan-themer, include = FALSE}
-library(xaringanthemer)
-mono_accent(
-  base_color = "#2c4fa3",
-  header_font_google = google_font("Francois One"),
-  text_font_google   = google_font("Roboto Condensed", "400", "400i"),
-  code_font_google   = google_font("Fira Code"),
-  code_font_size = '0.65m',
-  text_font_size = '1.5em',
-  title_slide_background_image = 'figs/santos_landsat.png',
-  link_color = "#eb0037" 
-)
 
-library(knitr)
-opts_chunk$set(eval=F)
-```
 
 # Apresentações
 
@@ -108,7 +95,8 @@ background-size: cover
 
 **ee.Image**: um único elemento de imagem. Digite o código abaixo e clique em `Run` no Code Editor:
 
-```{js}
+
+```js
 // Carrega o modelo de elevação digital ALOS World 3D (versão 30m)
 
 var aw3d30 = ee.Image('JAXA/ALOS/AW3D30_V1_1')
@@ -130,7 +118,8 @@ Não ficou muito bonito..O GEE usa como default o range máximo dos dados. Mas a
 
 $`visParams` recebe uma lista de pares nome:objeto (`{name:object}`):
 
-```{js}
+
+```js
 Map.addLayer(aw3d30,{min: 0, max: 2000},'ALOS DEM 30m')
 ```
 
@@ -146,15 +135,14 @@ class: center, middle
 A propósito, perceberam que nós acabamos de carregar um dataset global com resolução espacial de 30 metros, **em alguns segundos**?  
 
 
-```{r eval=T, echo=FALSE, out.width='50%',fig.align='center'}
-knitr::include_graphics('https://media.giphy.com/media/xT0xeJpnrWC4XWblEk/giphy.gif')
-```
+&lt;img src="https://media.giphy.com/media/xT0xeJpnrWC4XWblEk/giphy.gif" width="50%" style="display: block; margin: auto;" /&gt;
 ---
 ## Qual a informação contida na imagem?
 
 Podemos usar a função `print` para inspecionar uma variável:
 
-```{js}
+
+```js
 print('Do que é feita a salsicha:', aw3d30)
 ```
 
@@ -162,11 +150,12 @@ As bandas das imagens são identificadas, e podemos acessar vários metadados ta
 
 --
 
-$~$
+`\(~\)`
 
 Sabendo o nome das bandas, podemos selecionar as que nos interessam:
 
-```{js}
+
+```js
 Map.addLayer(aw3d30.select('AVE'), {min: 0, max: 2000}, 'ALOS DEM - Média')
 
 Map.addLayer(aw3d30.select('MED'), {min: 0, max: 2000}, 'ALOS DEM - Mediana')
@@ -176,7 +165,8 @@ Map.addLayer(aw3d30.select('MED'), {min: 0, max: 2000}, 'ALOS DEM - Mediana')
 
 **`ee.ImageCollection`**: Um dataset que inclui diversas imagens. Vamos usar o registro histórico do Landsat 5 como exemplo:
 
-```{js}
+
+```js
 var L5 = ee.ImageCollection('LANDSAT/LT05/C01/T1_SR')
 
 print(L5)
@@ -185,7 +175,8 @@ Ooops! O que aconteceu?
 
 --
 
-```{js}
+
+```js
 // Quantas imagens tem realmente nessa coleção?
 var count = L5.size()
 print('Count: ', count)
@@ -195,7 +186,8 @@ print('Count: ', count)
 
 ## Tente entender tudo o que está acontecendo aqui:
 
-```{js}
+
+```js
 var L5 = ee.ImageCollection('LANDSAT/LT05/C01/T1_SR')
 
 //print(L5)
@@ -220,7 +212,8 @@ Map.centerObject(image, 6)
 
 Existem diversas funções para acessar os metadados das imagens:
 
-```{js}
+
+```js
 // Obtém informação sobre as imagens como uma lista
 var bandNames = image.bandNames()
 print('Nomes das Bandas: ', bandNames) // ee.List of band names
@@ -249,9 +242,10 @@ A primeira coisa que vocês vão querer fazer com uma `Collection` é filtrar (s
 
 Desenhe um polígono na tela e chame-o de ROI (region of interest), e depois use-o para selecionar imagens da sua área de interesse.
 
-```{js}
+
+```js
 var L5 = ee.ImageCollection('LANDSAT/LT05/C01/T1_SR')
-    .filterBounds(ROI) #<<
+*   .filterBounds(ROI)
 
 var count = L5.size()
 print('Count: ', count)
@@ -261,10 +255,11 @@ print('Count: ', count)
 
 Adicionando um filtro de intervalo de datas:
 
-```{js}
+
+```js
 var L5 = ee.ImageCollection('LANDSAT/LT05/C01/T1_SR')
     .filterBounds(ROI) 
-    .filterDate('2010-01-01','2010-12-31') #<<
+*   .filterDate('2010-01-01','2010-12-31')
 
 var count = L5.size()
 print('Count: ', count)
@@ -274,11 +269,12 @@ print('Count: ', count)
 
 Adicionando um filtro de metadados:
 
-```{js}
+
+```js
 var L5 = ee.ImageCollection('LANDSAT/LT05/C01/T1_SR')
     .filterBounds(ROI)
     .filterDate('2010-01-01','2010-12-31')
-    .filterMetadata('CLOUD_COVER_LAND','less_than',10) #<<
+*   .filterMetadata('CLOUD_COVER_LAND','less_than',10)
 
 var count = L5.size()
 print('Count: ', count)
@@ -289,12 +285,13 @@ print('Count: ', count)
 
 Adicionando um filtro de sazonalidade:
 
-```{js}
+
+```js
 var L5 = ee.ImageCollection('LANDSAT/LT05/C01/T1_SR')
     .filterBounds(ROI)
     .filterDate('2010-01-01','2010-12-31')
     .filterMetadata('CLOUD_COVER_LAND','less_than',10)
-    .filter(ee.Filter.calendarRange(135,196,'day_of_year')) #<<
+*   .filter(ee.Filter.calendarRange(135,196,'day_of_year'))
 
 var count = L5.size()
 print('Count: ', count)
@@ -319,7 +316,8 @@ background-size: cover
 
 **Operações Matemáticas**: por *default*, são aplicadas pixel a pixel.
 
-```{js}
+
+```js
 var landsat1999 = ee.Image('LANDSAT/LE7_TOA_5YEAR/1999_2003')
 var landsat2008 = ee.Image('LANDSAT/LE7_TOA_5YEAR/2008_2012')
 
@@ -337,7 +335,8 @@ Map.addLayer(ndvi1999,{min: 0.3, max: 1},'NDVI 1999')
 
 Pra nossa sorte, existe uma função específica para diferenças normalizadas:
 
-```{js}
+
+```js
 var ndvi2008 = landsat2008.normalizedDifference(['B4', 'B3'])
 
 Map.addLayer(ndvi2008,{min: 0.3, max: 1},'NDVI 2008')
@@ -352,14 +351,15 @@ Map.addLayer(delta_ndvi, {min: 0, max: 0.5}, 'NDVI difference')
 
 **Operações booleanas**: para fatiamento e geração de máscaras.
 
-```{js}
+
+```js
 var bare = ndvi2008.lt(0.2)
 
 var changed = delta_ndvi.gt(0.1)
 
 Map.addLayer(bare,{},"Areas Expostas")
 
-Map.addLayer(changed,{},"dNDVI > 0.1")
+Map.addLayer(changed,{},"dNDVI &gt; 0.1")
 
 Map.addLayer(ndvi2008.updateMask(bare), {}, 'NDVI mascarado')
 ```
@@ -370,7 +370,8 @@ Map.addLayer(ndvi2008.updateMask(bare), {}, 'NDVI mascarado')
 
 **Transformações Espectrais**: pan-sharpening 
 
-```{js}
+
+```js
 // Imagem precisa ser do tipo TOA, o produto SR nao inclui a banda pan (8)
 var image = ee.Image('LANDSAT/LC08/C01/T1_TOA/LC08_219076_20130901')
 
@@ -398,7 +399,8 @@ Map.addLayer(sharpened, {min: 0, max: 0.25}, 'pan-sharpened')
 
 **Transformações Espectrais**: modelo de mistura
 
-```{js}
+
+```js
 var image = ee.Image('LANDSAT/LT05/C01/T1/LT05_044034_20080214').select('B[1-7]')
 
 Map.addLayer(image, {
@@ -432,7 +434,8 @@ Map.addLayer(fractions, {}, 'unmixed')
 
 *`map`*: Aplica uma função sobre cada imagem da coleção. O que equivalente a um loop `for` (ou um `lapply` no `R`).
 
-```{js}
+
+```js
 var L5 = ee.ImageCollection('LANDSAT/LT05/C01/T1_SR')
     .filterBounds(ROI) 
     .filterDate('2010-01-01','2010-12-31')
@@ -443,7 +446,7 @@ var calcNDVI = function(image) {
   return image.normalizedDifference(['B4', 'B3'])
 } 
 
-var ndvi = L5.map(calcNDVI) #<<
+*var ndvi = L5.map(calcNDVI)
 
 print(ndvi, "NDVI Collection")
 
@@ -455,7 +458,8 @@ Map.centerObject(ndvi)
 
 A função `map` (diferente de `Map`!) também é útil para aplicar máscaras sobre a coleção:
 
-```{js}
+
+```js
 // Função para extrair e aplicar as máscaras de nuvem geradas pelo algoritmo
 // 'Fmask', inclusa nos metadados das imagens de reflectância de superfície do Landsat.
 
@@ -482,7 +486,8 @@ var mask_clouds = function(image) {
 
 Aplicando as máscaras em toda a coleção:
 
-```{js}
+
+```js
 var cmasked = L5.map(mask_clouds)
 var masked = ee.Image(cmasked.first())
 
@@ -502,7 +507,8 @@ Map.addLayer(masked, vizParams, 'Masked')
 
 *`reduce`*: combina todas as imagens na coleção através de alguma função. Esse é o meu principal uso do GEE: a geração de imagens compostas!
 
-```{js}
+
+```js
 var reduced = cmasked.reduce(ee.Reducer.median())
 
 Map.addLayer(reduced,{
@@ -531,7 +537,8 @@ Recomendo criar uma pasta no seu repositório chamada `modules`, só para guarda
 ---
 ## Reutilizando funções: módulos
 
-```{js}
+
+```js
 // Function to cloud mask from the Fmask band of Landsat 8 SR data.
 
 exports.LScloudmask = function(image) {
@@ -557,7 +564,8 @@ exports.LScloudmask = function(image) {
 
 Agora, podemos importar essa função sempre que quisermos aplicar a máscara de nuvens em imagens de reflectância de Superfície do Landsat 8:
 
-```{js}
+
+```js
 var modulo = require('users/thiagosfsilva/modules:LScloudmask')
 
 var L8 = ee.ImageCollection('LANDSAT/LC08/C01/T1_SR')
@@ -572,7 +580,6 @@ Map.addLayer(L8_comp,{
   max: [3200, 3500, 2500]}
 , 'Masked')
 
-
 ```
 
 ---
@@ -582,7 +589,8 @@ Um módulo bastante útil disponibilizado pelo grupo [GEE Community](https://git
 
 https://github.com/gee-community/ee-palettes
 
-```{js}
+
+```js
 var rampas = require('users/gena/packages:palettes');
 
 var viridis = rampas.matplotlib.viridis[7].reverse();
@@ -595,7 +603,7 @@ Map.addLayer(simard,{palette:viridis, min: 0, max: 73}, "Global Tree Height")
 
 ## Exercício: juntando tudo!
 
-<small>
+&lt;small&gt;
 0 - Iniciem um novo script (sem copiar dos anteriores!)
 
 1 - Digitalizem uma região de interesse
@@ -616,7 +624,7 @@ Map.addLayer(simard,{palette:viridis, min: 0, max: 73}, "Global Tree Height")
 
 9 - Calculem o NDVI a partir da imagem composta e mostrem usando a paleta viridis do módulo `ee-palettes`
 
-</small>
+&lt;/small&gt;
 ---
 class: middle, center, inverse
 background-image: url('https://s.w-x.co/1_caters_earth_as_art_02-1_0.jpg')
@@ -629,7 +637,8 @@ background-size: cover
 
 Vamos gerar duas imagens compostas, uma para cada época do ano:
 
-```{js}
+
+```js
 var ROI = ee.Geometry.Rectangle([-47.98,-22.28, -47.80, -22.19]);
 // ordem é xMin, yMin, xMax, yMax
 
@@ -652,7 +661,8 @@ Map.addLayer(L8_dry_comp, vizParam, 'L8 Seca')
 
 O GEE exporta dados para o Google Drive da conta associada:
 
-```{js}
+
+```js
 Export.image.toDrive({
   image: L8_wet_comp,
   description: 'L8_umida_2014-2018',
@@ -687,7 +697,8 @@ Algoritmos: todas as funções começando com `ee.Classifier`.
 
 Podemos usar as imagens do exemplo anterior, sobre exportação de dados. Temos duas imagens de entrada, uma da estação seca e uma da estação úmida:
 
-```{js}
+
+```js
 Map.addLayer(L8_wet_comp, vizParam, 'L8 Umida')
 Map.addLayer(L8_dry_comp, vizParam, 'L8 Seca')
 ```
@@ -697,7 +708,8 @@ Map.addLayer(L8_dry_comp, vizParam, 'L8 Seca')
 
 O primeiro passo é gerar ou importar um conjunto de amostras de treinamento. Os pontos ou polígonos precisam ter uma coluna que identifique as classes por números.
 
-```{js}
+
+```js
 // Carregando as amostras de treinamento
 var amostras = ee.FeatureCollection("users/thiagosfsilva/training_samples")
 
@@ -708,7 +720,8 @@ Map.addLayer(amostras)
 
 O processo para "pintar" polígonos a partir de atributos é um pouco complexo:
 
-```{js}
+
+```js
 // Criando rampa de cores para os dados de treinamento
 var cores = require('users/gena/packages:palettes'); // modulo de paleta de cores
 var paleta = cores.colorbrewer.Paired[9];
@@ -731,7 +744,8 @@ Map.addLayer(ams_viz, {palette:paleta, min:1, max:9}, 'Amostras');
 
 Uma vez que temos as imagens de entrada e as amostras, precisamos extrair os pixels referentes às amostras, para treinamento e teste do algoritmo selecionado.
 
-```{js}
+
+```js
 // Lista os nomes das classes de interesse
 var classes = amostras.aggregate_array('class')
 print(classes)
@@ -751,7 +765,8 @@ var treinamento = L8_dry_comp.sampleRegions({
 
 Depois da extração, separamos a amostra em dois conjuntos, para treino e teste.
 
-```{js}
+
+```js
 // /cria uma coluna de valores aleatorios entre 0 e 1
 var aleatorio = treinamento.randomColumn('random') 
 
@@ -768,7 +783,8 @@ var teste = aleatorio.filter(ee.Filter.gte('random', split))
 
 Primeiro treinamos o algoritmo com os dados de treinamento.
 
-```{js}
+
+```js
 
 var classificador = ee.Classifier.randomForest({numberOfTrees: 500}).train({
    features: treino,
@@ -783,7 +799,8 @@ var classificador = ee.Classifier.randomForest({numberOfTrees: 500}).train({
 
 Depois, aplicamos os algoritmos aos dados de teste.
 
-```{js}
+
+```js
 // Aplicamos o classificador aos dados de teste
 var class_teste = teste.classify(classificador)
 
@@ -793,7 +810,8 @@ var class_teste = teste.classify(classificador)
 
 A partir daí, podemos extrair uma matriz de confusão, e calcular a acurácia.
 
-```{js}
+
+```js
 // Calculamos a matriz de erro e acurácia
 var confmat = class_teste.errorMatrix('class_num', 'classification')
 print('Matriz de Erro - RF', confmat)
@@ -808,7 +826,8 @@ No nosso exemplo, a amostra de teste é enviesada, pois vem dos mesmos polígono
 
 Se estivermos contentes com os resultados, podemos então aplicar o classificador à toda a imagem, e visualizar o resultado.
 
-```{js}
+
+```js
 // Aplicamos o classificador a toda a imagem
 var class_seca = L8_dry_comp.classify(classificador)
 
@@ -856,7 +875,7 @@ background-size: cover
 
 "A Feature in Earth Engine is defined as a GeoJSON Feature. Specifically, a Feature is an object with a `geometry` property storing a Geometry object (or null) and a `properties` property storing a dictionary of other properties."
 
-`geometry` (polígono) > `Feature` (polígono + atributo) > `FeatureCollection` (várias features) 
+`geometry` (polígono) &gt; `Feature` (polígono + atributo) &gt; `FeatureCollection` (várias features) 
 
 ---
 ### Importando vetores
@@ -879,7 +898,8 @@ Na porção superior esquerda, clique na aba `Assets`:
 
 Tenho trabalhado em um projeto relacionando medidas de temperatura em solo com dados de sensoriamento remoto e dados auxiliares. Vamos carregar a localização das medidas de solo:
 
-```{js}
+
+```js
 var ibutton = ee.FeatureCollection("users/thiagosfsilva/ibutton_locations")
 
 var ibuttonbbox = ibutton.geometry().bounds().buffer(1000)
@@ -895,7 +915,8 @@ Map.centerObject(ibuttonbbox, 10)
 Agora vamos gerar dados de temperatura de brilho a partir de dados Landsat
 
 
-```{js}
+
+```js
 var  mod = require('users/thiagosfsilva/modules:LScloudmask')
 
 var L5 = ee.ImageCollection('LANDSAT/LT05/C01/T1_SR')
@@ -920,7 +941,8 @@ Map.addLayer(ee.Image(L5_masked.first()).select('B6'), vizParams, 'Primeira imag
 Com a coleção devidamente mascarada pra nuvens, podemos gerar descritores
 
 
-```{js}
+
+```js
 var max_temp = L5_masked.max().select('B6').clip(ibuttonbbox)
 
 var min_temp = L5_masked.min().select('B6').clip(ibuttonbbox)
@@ -935,7 +957,8 @@ Map.addLayer(min_temp, vizParams, "TMin 2009-2010")
 
 Podemos também gerar descritores de vegetação:
 
-```{js}
+
+```js
 var getNDVI = function(image){
   var ndvi = image.normalizedDifference(['B4','B3'])
   return(ndvi)
@@ -957,7 +980,8 @@ Map.addLayer(ndvi_range,{min: 0, max: 2, palette: ['red','green']}, "NDVI_range"
 
 E por que não preditores topográficos?
 
-```{js}
+
+```js
 var alosdem = ee.Image('JAXA/ALOS/AW3D30_V1_1').select('MED').clip(ibuttonbbox)
 
 var slope = ee.Terrain.slope(alosdem)
@@ -973,7 +997,8 @@ Map.addLayer(aspect,{min: 0, max: 360},"Aspect")
 
 Agora podemos empilhar todas as camadas em uma única imagem:
 
-```{js}
+
+```js
 var pred_set = ee.Image.cat(max_temp, min_temp,
   max_ndvi, ndvi_range, alosdem, slope, aspect)
   .rename(['max_temp', 'min_temp',
@@ -987,7 +1012,8 @@ print(pred_set)
 
 E extrair os preditores para cada ponto:
 
-```{js}
+
+```js
 
 var pred_extract = pred_set.reduceRegions({
   collection: ibutton,
@@ -1017,7 +1043,8 @@ background-size: cover
 
 O GEE permite o uso de JavaScript para geração de aplicativos. Como exemplo, criaremos um visualizador de imagens compostas anuais da série Landsat. Primeiro, criamos uma coleção juntando imagens L5 e L8.
 
-```{js}
+
+```js
 // Digitalize uma ROI para ficar mais rápido
 
 var bb = ROI.bounds().buffer(1000).bounds()
@@ -1043,7 +1070,8 @@ var L8 = L8raw.map(renameBandsOLI)
 ---
 ## Aplicativos
 
-```{js}
+
+```js
 // Juntando as duas coleções em uma
 var collection = L5.merge(L8).sort('DATE_ACQUIRED')
 
@@ -1067,7 +1095,8 @@ print(complist.getInfo())
 
 Agora definimos os elementos do aplicativo:
 
-```{js}
+
+```js
 // Funcao para mostrar a imagem selecionada no mapa
 var showLayer = function(year) {
   Map.layers().reset();
@@ -1091,7 +1120,8 @@ var slider = ui.Slider({
 
 Agora definimos os elementos do aplicativo:
 
-```{js}
+
+```js
 // Create a panel that contains both the slider and the label.
 var panel = ui.Panel({
   widgets: [label, slider],
@@ -1111,7 +1141,8 @@ Map.add(panel)
 
 Por fim, definimos a data e visualização *default* para não começar com a tela vazia:
 
-```{js}
+
+```js
 // Set default values on the slider and default map
 slider.setValue(1985)
 
@@ -1142,3 +1173,95 @@ class: center, middle, inverse
 ### Thiago Sanna Freire Silva: thiago.sf.silva@stir.ac.uk ,     [@thi_sanna](https://mobile.twitter.com/thi_sanna)
 
 ### Annia Susin Streher: annia.streher@gmail.com ,     [@anniaastronaut](https://mobile.twitter.com/anniaastronaut)
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();</script>
+
+<script>
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
