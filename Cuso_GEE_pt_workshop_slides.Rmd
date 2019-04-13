@@ -1126,7 +1126,7 @@ Map.centerObject(ROI,8)
 
 O GEE oferece outras opções, como ajuste de modelos, análises de objetos, geração de gráficos, etc. 
 
-Normalmente, eu prefiro baixar os dados e fazer esse tipo de processamento usando `R` ou `python`. Mas caso haja interesse, existem exemplos no [User Guide](https://developers.google.com/earth-engine/) e também na losta de scripts de exemplo.
+Normalmente, eu prefiro baixar os dados e fazer esse tipo de processamento usando `R` ou `python`. Mas caso haja interesse, existem exemplos no [User Guide](https://developers.google.com/earth-engine/) e também na pasta de scripts de exemplo.
 
 A lista de discussão também costuma ser um ótimo recurso.
 
