@@ -10,6 +10,8 @@ O curso compreende as seguintes unidades, com uma carga horário de 8 horas:
 - Combinação de dados `raster` e vetoriais
 - Exemplo de criação de aplicativos
 
+A página do curso é https://thiagosfsilva.github.io/Curso_GEE_pt/
+
 Os slides do curso estão disponíveis [neste link](https://thiagosfsilva.github.io/Curso_GEE_pt/Cuso_GEE_pt_workshop_slides.html).
 
 A primeira edição do curso foi oferecida durante o [XIX Simpósio Brasileiro de Sensoriamento Remoto](http://sbsr.com.br/br/node/1379), em 14 de abril de 2019.
